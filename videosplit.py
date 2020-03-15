@@ -7,26 +7,20 @@ import pandas as pd
 from tkinter import Tk
 from tkinter.filedialog import askopenfilename
 
-def split_multithread(in_filename, out_filename, n_splits):
+def split_multithread(in_filename, out_filename, start, end):
     os.makedirs(os.path.dirname(out_filename), exist_ok=True)
 
-    probe = ffmpeg.probe(in_filename)
-    duration = float(probe["format"]["duration"])
+    p = (
+        ffmpeg
+        .input(in_filename)
+        .trim(start=start, end=end)
+        .output(out_filename)
+        .run_async(pipe_stdin=True, pipe_stdout=True, pipe_stderr=True)
+    )
 
-    for i in range(0, n_splits):
-        start = i * duration / n_splits
-        end = (i + 1) * duration / n_splits
-
-        p = (
-            ffmpeg
-            .input(in_filename)
-            .trim(start=start, end=end)
-            .output(out_filename.format(i))
-            .run_async(pipe_stdin=True)
-        )
-
-        p.communicate(input="y".encode())
-        p.wait()
+    print("{}({}s : {}s) ==> {}".format(in_filename, start, end, out_filename))
+    p.communicate(input="y".encode())
+    p.wait()
 
 if __name__ == '__main__':
 
@@ -40,5 +34,5 @@ if __name__ == '__main__':
 
     dfs = pd.read_excel(filename)
     for index, row in dfs.iterrows():
-        input, output, n_splits = row["Input"], row["Output"], row["N splits"]
-        split_multithread(in_filename=input, out_filename=output, n_splits=n_splits)
+        input, output, start, end = row["Input"], row["Output"], row["Start"], row["End"]
+        split_multithread(input, output, start, end)
