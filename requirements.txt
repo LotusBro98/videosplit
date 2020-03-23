@@ -1,1 +1,1 @@
-ffmpeg-python pandas
+ffmpeg-python xlrd
