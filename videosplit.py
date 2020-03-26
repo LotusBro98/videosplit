@@ -2,7 +2,6 @@ import datetime
 import glob
 import os
 import sys
-sys.path.insert(0, "venv/Lib/site-packages")
 
 import ffmpeg
 import xlrd
