@@ -26,11 +26,20 @@ def extract_part(in_filename, out_filename, start, end):
     proc.communicate(input="y".encode())
     proc.wait()
 
+def str_to_xldate(i):
+    if type(i) == xlrd.xldate:
+        return i
+    elif type(i) == str:
+        return xlrd.xldate.xldate_from_time_tuple((0, int(i.split(":")[0]), int(i.split(":")[1])))
+    else:
+        return i
+
 def parse_file(filename, in_dir="in", out_dir="out"):
     wb = xlrd.open_workbook(filename)
     sheet = wb.sheet_by_index(0)
 
     scenes = sheet.row_values(2, 4)
+    scenes = [str_to_xldate(i) for i in scenes]
     scene_names = sheet.row_values(0, 4)[::2]
     n_scenes = len(scene_names)
 
@@ -41,8 +50,8 @@ def parse_file(filename, in_dir="in", out_dir="out"):
         (xlrd.xldate_as_datetime(scenes[2*i+1], datemode=0) - t0).total_seconds() / 60
     ) for i in range(n_scenes)]
 
-    starts = sheet.col_slice(3, 2)
-    starts = [(xlrd.xldate_as_datetime(t.value, datemode=0) - t0).total_seconds() / 60 for t in starts]
+    starts = sheet.col_values(3, 2)
+    starts = [str_to_xldate(i) for i in starts]
 
     names = sheet.col_values(1, 2)
 
