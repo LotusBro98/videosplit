@@ -11,17 +11,28 @@ from tkinter.filedialog import askopenfilename
 def extract_part(in_filename, out_filename, start, end):
     os.makedirs(os.path.dirname(out_filename), exist_ok=True)
 
+    p = ffmpeg.probe(in_filename, select_streams='a')
+
+
     input = ffmpeg.input(in_filename)
     video = (
-        input
-        .trim(start=start, end=end)
-        .setpts("PTS-STARTPTS")
+        input.video
+        .filter("trim", start=start, end=end)
+        .filter("setpts", expr="PTS-STARTPTS")
     )
-    output = ffmpeg.output(video, out_filename)
+    if p["streams"]:
+        audio = (
+            input.audio
+            .filter("atrim", start=start, end=end)
+            .filter("asetpts", expr="PTS-STARTPTS")
+        )
+        output = ffmpeg.output(video, audio, out_filename)
+    else:
+        output = ffmpeg.output(video, out_filename)
 
     proc = output.run_async(pipe_stdin=True, pipe_stdout=True, pipe_stderr=True)
 
-    print("{}({}s : {}s) ==> {}".format(in_filename, int(start), int(end), out_filename))
+    print("{}({}:{} -- {}:{}) ==> {}".format(in_filename, int(start/60), int(start%60), int(end/60), int(end%60), out_filename))
     proc.communicate(input="y".encode())
     proc.wait()
 
