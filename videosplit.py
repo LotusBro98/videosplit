@@ -30,7 +30,7 @@ def str_to_xldate(i):
     if type(i) == xlrd.xldate:
         return i
     elif type(i) == str:
-        return xlrd.xldate.xldate_from_time_tuple((0, int(i.split(":")[0]), int(i.split(":")[1])))
+        return xlrd.xldate.xldate_from_time_tuple((int(i.split(":")[0]), int(i.split(":")[1]), 0))
     else:
         return i
 
