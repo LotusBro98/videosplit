@@ -21,7 +21,7 @@ def extract_part(in_filename, out_filename, start, end):
 
     proc = output.run_async(pipe_stdin=True, pipe_stdout=True, pipe_stderr=True)
 
-    print("{}({}s : {}s) ==> {}".format(in_filename, start, end, out_filename))
+    print("{}({}s : {}s) ==> {}".format(in_filename, int(start), int(end), out_filename))
     proc.communicate(input="y".encode())
     proc.wait()
 
