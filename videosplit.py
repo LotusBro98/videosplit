@@ -62,6 +62,7 @@ def parse_file(filename, in_dir="in", out_dir="out"):
 
     starts = sheet.col_values(3, 2)
     starts = [str_to_xldate(i) for i in starts]
+    starts = [(xlrd.xldate_as_datetime(i, datemode=0) - t0).total_seconds() / 60 for i in starts]
 
     names = sheet.col_values(1, 2)
 
